@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "target": "es2017",
+        "removeComments": true,
+        "noImplicitThis": true,
+        "inlineSourceMap": true,
+        "moduleResolution": "node",
+        "outDir": "react_bot/out"
+    },
+    "include": [
+        "react_bot/src"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
