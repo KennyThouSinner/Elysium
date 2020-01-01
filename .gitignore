@@ -1,3 +1,4 @@
 react_bot/out/
 react_bot/src/config.ts
 node_modules/
+.vscode/
