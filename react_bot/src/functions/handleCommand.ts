@@ -15,7 +15,7 @@ export async function handleCommand(message: Message, pref: string) {
 
 
             if (commands[i].adminOnly === true && !message.member.permissions.has("ADMINISTRATOR")) return message.channel.send(`You do not have the sufficient permission in order to execute this command.`);
-            if (commands[i].devOnly === true && message.author.id !== "575108662457139201") return message.channel.send(`You do not have the sufficient permission in order to call this action.`)
+            if (commands[i].devOnly === true && !["575108662457139201", "646111749543821312"].some(i => i === message.author.id)) return message.channel.send(`You do not have the sufficient permission in order to call this action.`)
 
             await commands[i].runCommand(args, message, client);
         } catch (e) {
