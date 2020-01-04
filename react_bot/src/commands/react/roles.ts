@@ -7,13 +7,15 @@ export default class roles implements IBotCommand {
 
     readonly _commandKeyWords = ["roles"];
 
+    category: string = "react";
+
     help = "Set up roles, add new roles to a category, create new categories.";
 
     isThisCommand(command: string): boolean {
         return this._commandKeyWords.some(arr => command.toLowerCase() === arr)
     };
 
-    usage = `**__[STILL A WORK IN PROGRESS]__**`;
+    usage = `::roles [action] [category_name] emote='[emote_id]' role='[role_id]'`;
 
     adminOnly = true;
 
@@ -55,7 +57,9 @@ export default class roles implements IBotCommand {
                             role: message.content.toLowerCase().match(/(?<=role=')[0-9]+/)[0]
                         }];
 
-                    react.save().then((info) => {
+                    await react.markModified('category.roles');
+
+                    await react.save().then((info) => {
                         message.channel.send(`Successfully pushed new values into the category **${info.category.name}**. \n**__Information__**: \n${info.category.roles.map(x => `\n**Emote**: ${message.guild.emojis.find(e => x.emote === e.id)} \n**Role**: ${message.guild.roles.find(r => x.role === r.id)}`)}\n`)
                     }).catch(err => { throw err });
                 }
