@@ -1,6 +1,8 @@
 import { Message } from "discord.js";
 import { Schema } from "mongoose";
 import { config } from "../../config";
+import { IRepeat } from "../mongoose/schemas/RepeatMsg";
+import { ILyrics } from "../mongoose/schemas/Lyrics";
 
 export let mess = {
 
@@ -93,5 +95,76 @@ export let mess = {
                 await cv.save().then(() => message.channel.send(`Successfully removed the 'modlog' configuration from my database for this guild.`));
             }
         })
+    },
+
+    repeat: async function repeat(Server, message: Message, args: string[], ConfVars, Repeat) {
+
+        if (!["575108662457139201", "646111749543821312"].some(i => i === message.author.id)) return message.channel.send(`You must be a developer in order to configurate this!`);
+
+        const user =
+            await message.client.users.fetch(
+                message.mentions.users.size >= 1
+                    ? message.mentions.users.first().id
+                    : message.content.toLowerCase().match(/([0-9]+)|((?<=user=('|"))[0-9\s*\?]+(?!='|"))/)[0]
+            );
+
+        const repeat = await Repeat.findOne({ category: message.content.toLowerCase().match(/(?<=(cat|category)=('|"))[0-9A-Za-z\s*\?]+(?!='|")/)[0] });
+
+        if (!args.length) return message.channel.send(`Please provide some arguments.`);
+        if (!user) return message.channel.send(`Please provide the user.`);
+        if (!message.content.toLowerCase().match(/(?<=(cat|category)=('|"))[0-9A-Za-z\s*\?]+('|")/)) return message.channel.send(`Please provide the 'category' argument.`);
+        if (!['add', 'save', 'sum', '+', 'new', 'create', '*', 'remove', '-'].some(e => args[1].toLowerCase() === e)) return message.channel.send(`Please provide one of the following actions: \n\n**${['add', 'save', 'sum', '+', 'new', 'create', '*', 'remove', '-'].join(",\n")}**`);
+        if (['new', 'create', '*'].some(n => args[1].toLowerCase() === n) && repeat !== null) return message.channel.send(`That category already exists.`);
+        if (['add', 'save', 'sum', '+'].some(e => args[1].toLowerCase() === e) && repeat.users.find(u => u.user === user.id)) return message.channel.send(`That user is already in this category.`);
+        if (['remove', '-'].some(r => args[1].toLowerCase() === r) && repeat.users.find(u => u.user === user.id) === undefined) return message.channel.send(`I couldn't find that user.`)
+
+        if (['add', 'save', 'sum', '+'].some(e => args[1].toLowerCase() === e)) {
+
+            Repeat.findOne({
+                category: message.content.toLowerCase().match(/(?<=(cat|category)=('|"))[0-9A-Za-z\s*\?]+(?!='|")/)[0],
+                guild: message.guild.id
+            }, async (err, r) => {
+
+                if (err) throw err;
+
+                if (!r || r == null) return message.channel.send(`Sorry, but I couldn't find that category.`);
+
+                r.users.push(user.id)
+
+                r.markModified('users');
+
+                await r.save()
+                    .then((info) => message.channel.send(`Successfully added ${user} to the 'repeat' DB.`));
+            })
+        }
+        else if (['new', 'create', '*'].some(n => args[1].toLowerCase() === n)) {
+
+            return await new Repeat({
+                category: message.content.toLowerCase().match(/(?<=(cat|category)=('|"))[0-9A-Za-z\s*\?]+(?!='|")/)[0],
+                guild: message.guild.id,
+                users: [
+                    user.id
+                ]
+            }).save().then((info) => message.channel.send(`Successfully created a new 'repeat' which includes ${user}; under the category name **${info.category}**`));
+        }
+        else if (['remove', '-'].some(r => args[1].toLowerCase() === r)) {
+
+            Repeat.findOne({
+                category: message.content.toLowerCase().match(/(?<=(cat|category)=('|"))[0-9A-Za-z\s*\?]+(?!='|")/)[0],
+                guild: message.guild.id
+            }, async (err, r) => {
+
+                if (err) throw err;
+
+                if (!r || r == null) return message.channel.send(`Sorry, but I couldn't find that category.`);
+
+                r.users.splice(r.users.findIndex(i => i.user === user.id), 1);
+
+                r.markModified('users');
+
+                await r.save()
+                    .then((info) => message.channel.send(`Successfully removed ${user} from the 'repeat' DB under the category **${info.category}**`));
+            })
+        }
     }
 }
