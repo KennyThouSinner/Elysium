@@ -5,10 +5,13 @@ import { vars } from '../../assets/variables/help_vars';
 import { mess } from '../../assets/messy_stuff/executeCode';
 import ConfVars, { Variables } from '../../assets/mongoose/schemas/config_variables';
 import Server, { GuildModel } from "../../assets/mongoose/schemas/Guild";
+import Repeat, { IRepeat } from '../../assets/mongoose/schemas/RepeatMsg';
 
 export default class config implements IBotCommand {
 
     readonly _commandKeyWords = ["config"];
+
+    category: string = "util";
 
     help = "Configurate the bot for your own guild (server).";
 
@@ -45,7 +48,7 @@ export default class config implements IBotCommand {
 
             let confVar = mess[newVar];
 
-            confVar(Server, message, args, ConfVars);
+            confVar(Server, message, args, ConfVars, Repeat);
         }
     }
 };

@@ -8,6 +8,8 @@ export default class kick implements IBotCommand {
 
     readonly _commandKeyWords = ["kick"];
 
+    category: string = "admin";
+
     help = "Kicks the mentioned member from the guild (server).";
 
     isThisCommand(command: string): boolean {

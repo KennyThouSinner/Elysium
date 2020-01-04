@@ -8,6 +8,8 @@ export default class ban implements IBotCommand {
 
     readonly _commandKeyWords = ["ban"];
 
+    category: string = "admin";
+
     help = "Bans the mentioned member from the guild (server).";
 
     isThisCommand(command: string): boolean {

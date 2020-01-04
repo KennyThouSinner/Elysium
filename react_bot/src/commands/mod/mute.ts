@@ -6,6 +6,8 @@ export default class mute implements IBotCommand {
 
     readonly _commandKeyWords = ["mute"];
 
+    category: string = "mod";
+
     help: string = "";
 
     isThisCommand(command: string): boolean {

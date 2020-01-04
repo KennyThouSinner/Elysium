@@ -7,6 +7,8 @@ export default class userinfo implements IBotCommand {
 
     readonly _commandKeyWords = ["userinfo", "ui", "info", "whois"];
 
+    category: string = "util";
+
     help: string = "Shows detailed information about the specified User";
 
     isThisCommand(command: string): boolean {

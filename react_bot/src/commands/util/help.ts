@@ -7,6 +7,8 @@ export default class help implements IBotCommand {
 
     readonly _commandKeyWords = ["help", "commands"];
 
+    category: string = "util";
+
     help = "Sends a scrollable embed which explains all the bot's commands";
 
     isThisCommand(command: string): boolean {
