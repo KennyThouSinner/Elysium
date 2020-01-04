@@ -1,6 +1,5 @@
 import { commands } from '../main';
-import { Message, MessageEmbed } from 'discord.js';
-import { MessageEmbedPageHandler } from '../embedPageHandler';
+import { Message, MessageEmbed, ReactionCollector, MessageReaction, User } from 'discord.js';
 import { IBotCommand } from '../api';
 
 export class handler {
@@ -20,25 +19,46 @@ export class handler {
     public helpRespond = async () => {
 
         if (!this.message.content.split(" ").slice(1)[0]) {
+
+
             let embed = new MessageEmbed()
-                .setTitle("List of all the commands");
+                .setTitle("Commands")
+                .setDescription(`**CATEGORIES**: \n⚒️ - **ADMINISTRATION** \n🛡️ - **MODERATION** \n👀 - **REACTION** \n⚙️ - **UTILITY**`);
 
             let sent = (await this.message.channel.send(embed)) as Message;
 
-            if (Array.isArray(this.message)) {
-                this.message = this.message[0];
-            }
+            ['⚒️', '🛡️', '👀', '⚙️', '❌'].forEach((e) => sent.react(e));
 
-            let itemHandler = (embed: MessageEmbed, data: Array<IBotCommand>) => {
-                data.forEach(item => {
-                    embed.addField(`${item._commandKeyWords[0][0].toUpperCase() + item._commandKeyWords[0].slice(1)}`, `${item.help} \n**Usage**: ${item.usage}`);
-                })
-                return embed;
-            }
+            let rc = sent.createReactionCollector(
+                (r: MessageReaction, u: User) => ['⚒️', '🛡️', '👀', '⚙️', '❌'].some(e => r.emoji.name === e) && u.id === this.message.author.id
+            );
 
-            let handler = new MessageEmbedPageHandler<IBotCommand>(commands, 5, itemHandler, embed, sent)
+            rc.on('collect', async (r: MessageReaction, u: User) => {
 
-            return handler.startCollecting(this.message.author.id, sent);
+                const adminEmbed = new MessageEmbed();
+                const modEmbed = new MessageEmbed();
+                const reactEmbed = new MessageEmbed();
+                const utilEmbed = new MessageEmbed();
+
+                let admin = () => {
+                    commands.filter(i => i.category == 'admin').forEach((a) => adminEmbed.setTitle('ADMINISTRATION').addField(a._commandKeyWords[0].toUpperCase() + a._commandKeyWords[0][0].slice(1), `**Help**: ${a.help} \n**Usage**: ${a.usage}`))
+                };
+                let mod = () => {
+                    commands.filter(i => i.category == 'mod').forEach((a) => modEmbed.setTitle('MODERATION').addField(a._commandKeyWords[0].toUpperCase() + a._commandKeyWords[0][0].slice(1), `**Help**: ${a.help} \n**Usage**: ${a.usage}`))
+                };
+                let react = () => {
+                    commands.filter(i => i.category == 'react').forEach((a) => reactEmbed.setTitle('REACTION').addField(a._commandKeyWords[0].toUpperCase() + a._commandKeyWords[0][0].slice(1), `**Help**: ${a.help} \n**Usage**: ${a.usage}`))
+                };
+                let util = () => {
+                    commands.filter(i => i.category == 'util').forEach((a) => utilEmbed.setTitle('UTILITY').addField(a._commandKeyWords[0].toUpperCase() + a._commandKeyWords[0][0].slice(1), `**Help**: ${a.help} \n**Usage**: ${a.usage}`));
+                }
+
+                if (r.emoji.name == '⚒️') { admin(); sent.reactions.delete(this.message.author.id); return sent.edit(adminEmbed) };
+                if (r.emoji.name == '🛡️') { mod(); sent.reactions.delete(this.message.author.id); return sent.edit(modEmbed) };
+                if (r.emoji.name == '👀') { react(); sent.reactions.delete(this.message.author.id); return sent.edit(reactEmbed) };
+                if (r.emoji.name == '⚙️') { util(); sent.reactions.delete(this.message.author.id); return sent.edit(utilEmbed) };
+                if (r.emoji.name == '❌') { await sent.delete(); rc.stop() };
+            });
 
         } else {
             const foundCmd = commands.find(arr => arr._commandKeyWords[0].toLowerCase() === this.message.content.split(" ").slice(1)[0].toLowerCase()) || commands.find(arr => arr._commandKeyWords.slice(1).some(r => r.toLowerCase() === this.message.content.split(" ").slice(1)[0].toLowerCase()));
