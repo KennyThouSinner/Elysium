@@ -10,5 +10,9 @@ export let vars = {
     modlog: {
         desc: "A mod-log channel, the bot will send every action/punishment with detailed information in there, so mods/admins can reference it at any given time",
         usage: `::config modlog [save/remove] [(#channel/channel_id)/---]`
+    },
+    repeat: {
+        desc: "A command to repeat an individual's every message they send, like a copy-cat.",
+        usage: `::config repeat [action] [cat/category]='' [@user/user_id/user='[user_id]']`
     }
 }
